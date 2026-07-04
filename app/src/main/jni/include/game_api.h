@@ -55,6 +55,7 @@ GameApiResult collectHearts(const GameApiSession &session);
 GameApiResult claimAncestorCandles(const GameApiSession &session);
 GameApiResult setPreferredHomeLevel(int preferred_home_level, const GameApiSession &session);
 GameApiResult claimSeasonCandle(const GameApiSession &session);
+GameApiResult collectWingLight(const GameApiSession &session);
 GameApiResult runFastMapRoute(const GameApiSession &session);
 void recordGamePatchId(unsigned int id);
 

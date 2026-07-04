@@ -160,6 +160,20 @@ constexpr const char *kCollectHeartsProgressFormat =
 constexpr const char *kCollectHeartsDoneFormat =
     "\xe6\x94\xb6\xe7\x88\xb1\xe5\xbf\x83\xe5\xae\x8c\xe6\x88\x90\x3a\x20%d\x20\xe4\xb8\xaa";
 
+constexpr const char *kCollectWingLightStart =
+    "\xe5\xbc\x80\xe5\xa7\x8b\xe6\x94\xb6\xe9\x9b\x86\xe5\x85\x89\xe7\xbf\xbc\x2e\x2e\x2e";
+constexpr const char *kCollectWingLightListFailed =
+    "\xe8\x8e\xb7\xe5\x8f\x96\xe5\x85\x89\xe7\xbf\xbc\xe5\x88\x97\xe8\xa1\xa8\xe5\xa4\xb1\xe8\xb4\xa5";
+constexpr const char *kCollectWingLightNoItems =
+    "\xe6\xb2\xa1\xe6\x9c\x89\xe5\x8f\xaf\xe6\x94\xb6\xe9\x9b\x86\xe7\x9a\x84\xe5\x85\x89\xe7\xbf\xbc";
+constexpr const char *kCollectWingLightCountFormat =
+    "\xe5\x85\xb1\x20%zu\x20\xe4\xb8\xaa\xe5\x85\x89\xe7\xbf\xbc";
+constexpr const char *kCollectWingLightProgressFormat =
+    "\xe6\x94\xb6\xe9\x9b\x86\xe5\x85\x89\xe7\xbf\xbc\x20%zu/%zu";
+constexpr const char *kCollectWingLightDoneFormat =
+    "\xe6\x94\xb6\xe9\x9b\x86\xe5\x85\x89\xe7\xbf\xbc\xe5\xae\x8c\xe6\x88\x90\x3a\x20"
+    "\xe6\x88\x90\xe5\x8a\x9f\x20%d\x2c\x20\xe5\xa4\xb1\xe8\xb4\xa5\x20%d";
+
 constexpr const char *kSendHeartFireStart =
     "\xe5\xbc\x80\xe5\xa7\x8b\xe9\x80\x81\xe5\xbf\x83\xe7\x81\xab\x2e\x2e\x2e";
 constexpr const char *kSendHeartFireListFailed =
@@ -2207,6 +2221,75 @@ GameApiResult collectHearts(const GameApiSession &session) {
     sendDialogHintTimed(done, 3.0f);
     logInfo("collectHearts recovered completed total=%zu success=%d", messages.size(), success_count);
     return result;
+}
+
+GameApiResult collectWingLight(const GameApiSession &session) {
+    sendDialogHintTimed(kCollectWingLightStart, 2.0f);
+
+    GameApiResult result = gameApiPostSelector1(session, "");
+    if (!result.ok || result.body.empty()) {
+        sendDialogHintTimed(kCollectWingLightListFailed, 3.0f);
+        return result;
+    }
+
+    std::string decoded = decodeResponseBody(session, result.body);
+    std::vector<WingBuffEntry> wings = parseWingBuffEntries(decoded);
+    if (wings.empty() && decoded != result.body) {
+        wings = parseWingBuffEntries(result.body);
+    }
+    if (wings.empty()) {
+        result.ok = false;
+        result.error = GAME_API_TEXT("parse wing buffs failed");
+        sendDialogHintTimed(kCollectWingLightListFailed, 3.0f);
+        return result;
+    }
+
+    std::vector<std::string> names;
+    for (const WingBuffEntry &entry : wings) {
+        if (!entry.collected) {
+            appendUniqueName(&names, entry.name);
+        }
+    }
+    if (names.empty()) {
+        sendDialogHintTimed(kCollectWingLightNoItems, 3.0f);
+        return result;
+    }
+
+    sendFormattedDialog(kCollectWingLightCountFormat, names.size(), static_cast<std::size_t>(-1), 2.0f);
+
+    GameApiResult last_result = result;
+    int success_count = 0;
+    int failure_count = 0;
+    for (std::size_t i = 0; i < names.size(); ++i) {
+        last_result = gameApiPostSelector9(session, buildWingBuffCollectBody(session, names[i]));
+        if (responseContainsDecodedOrPlain(session, last_result.body, "\"result\":\"ok\"")) {
+            ++success_count;
+        } else {
+            ++failure_count;
+        }
+
+        if (((i + 1) % 10) == 0 || i + 1 == names.size()) {
+            sendFormattedDialog(kCollectWingLightProgressFormat, i + 1, names.size(), 1.0f);
+        }
+        usleep(0x186A0);
+    }
+
+    if (failure_count > 0) {
+        last_result.ok = false;
+        if (last_result.error.empty()) {
+            last_result.error = GAME_API_TEXT("wing light collect response missing ok");
+        }
+    }
+
+    char done[128];
+    std::snprintf(done, sizeof(done), kCollectWingLightDoneFormat, success_count, failure_count);
+    sendDialogHintTimed(done, 3.0f);
+    logInfo(
+        "collectWingLight recovered completed total=%zu success=%d failure=%d",
+        names.size(),
+        success_count,
+        failure_count);
+    return last_result;
 }
 
 GameApiResult claimAncestorCandles(const GameApiSession &session) {

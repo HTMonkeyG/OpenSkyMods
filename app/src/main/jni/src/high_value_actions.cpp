@@ -143,6 +143,7 @@ constexpr HighValueCaseSpec kHighValueCases[] = {
     {8012},
     {8013},
     {8014},
+    {8015},
     {9999},
 };
 
@@ -651,6 +652,24 @@ void runHighValueWorker(HighValueCaseSpec spec, int int_value, std::string strin
         }
         logInfo(
             "claimSeasonCandle recovered request succeeded status=%d body_len=%zu",
+            result.http_status,
+            result.body.size());
+        return;
+    }
+
+    if (spec.feature_num == 8015) {
+        GameApiSession session = gameApiSessionFromMemory();
+        GameApiResult result = collectWingLight(session);
+        if (!result.ok) {
+            logWarn(
+                "collectWingLight recovered request failed status=%d error=%s body_len=%zu",
+                result.http_status,
+                result.error.c_str(),
+                result.body.size());
+            return;
+        }
+        logInfo(
+            "collectWingLight recovered request completed status=%d body_len=%zu",
             result.http_status,
             result.body.size());
         return;

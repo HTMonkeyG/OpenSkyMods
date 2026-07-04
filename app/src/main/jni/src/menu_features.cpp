@@ -49,6 +49,7 @@ const std::vector<std::string> &developerSettingsList() {
         u8"8011_Button_设置出生点-遇境",
         u8"8012_Button_设置出生点-空巢",
         u8"8014_Button_领取季蜡",
+        u8"8015_Button_一键收集光翼",
         u8"9010_Toggle_ESP方框",
         u8"9999_Button_任务测试",
         u8"1009_Toggle_循环换盾",
@@ -56,7 +57,7 @@ const std::vector<std::string> &developerSettingsList() {
         u8"1021_InputText_自定义烟花图案",
         u8"Category_物品生成器",
         u8"934_InputText_物品代码",
-        u8"935_Button_生成可拷取放置物",
+        u8"935_Button_生成可拾取放置物",
     };
     return kItems;
 }
@@ -349,7 +350,7 @@ extern "C" void JNICALL native_Menu_getLinearLayout(
 //
 // In the target these are statically-linked JNI exports (Java_com_android_support_Menu_*),
 // distinct from the RegisterNatives table above. Each returns a runtime-decoded std::string
-// global (sub_150DE8 static initializer, XOR decoders sub_20268C/sub_2026D0/sub_202704).
+// global (sub_1516D4 static initializer, XOR decoders sub_205A70/sub_205AB4/sub_205AE8).
 // Per project string policy the recovered plaintext is stored directly here; a shared
 // string/codec library can replace the literals later without changing behavior.
 extern "C" JNIEXPORT jstring JNICALL

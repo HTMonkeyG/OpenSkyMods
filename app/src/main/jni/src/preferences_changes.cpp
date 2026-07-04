@@ -1697,6 +1697,7 @@ constexpr SwitchCaseTarget kHighValueSwitchCases[] = {
     {8012, 0x1C068C},
     {8013, 0x1C071C},
     {8014, 0x1C08CC},
+    {8015, 0x1C5D54},
 };
 
 constexpr ScenePatchRange kScenePatchRanges[] = {

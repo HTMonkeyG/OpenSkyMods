@@ -18,12 +18,12 @@ struct HttpResponse {
 struct AuthConfig {
     std::string host = "wy.llua.cn";
     int port = 80;
-    std::string app_id = "64767";
+    std::string app_id = "82405";
     std::string app_id_alt = "68890";
-    std::string rc4_key = "wcwnCD4EcvkI0";
+    std::string rc4_key = "YIXCCjdZh9PmGRU";
     std::string rc4_key_alt = "40LDM6oG43NtE6i";
-    std::string sign_salt = "0kiG0I31Mvg600M0";
-    int expected_code = 893;
+    std::string sign_salt = "PmpjWS9KmsAP7PU";
+    int expected_code = 864;
     int expected_code_alt = 2183;
     int expected_signed_code = 200;
 };
